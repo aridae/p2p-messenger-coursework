@@ -3,13 +3,15 @@ package proto
 import (
 	"log"
 	"time"
+
+	"github.com/aridae/p2p-messenger-coursework/backendv2/domain"
 )
 
-func (p Proto) onHand(peer *Peer, envelope *Envelope) {
+func (p Proto) onHand(peer *domain.Peer, envelope *Envelope) {
 	log.Printf("onHand")
-	newPeer := NewPeer(*peer.Conn)
+	newPeer := domain.NewPeer(*peer.Conn)
 
-	err := newPeer.UpdatePeer(envelope)
+	err := UpdatePeer(newPeer, envelope)
 	if err != nil {
 		log.Printf("Update peer error: %s", err)
 	} else {
@@ -17,7 +19,6 @@ func (p Proto) onHand(peer *Peer, envelope *Envelope) {
 			p.UnregisterPeer(peer)
 		}
 
-		// TODO: не заменяется по ссылке (peer = newPeer), приходится копировать поля
 		peer.Name = newPeer.Name
 		peer.PubKey = newPeer.PubKey
 		peer.SharedKey = newPeer.SharedKey
@@ -28,11 +29,11 @@ func (p Proto) onHand(peer *Peer, envelope *Envelope) {
 	p.SendName(peer)
 }
 
-func (p Proto) onMess(peer *Peer, envelope *Envelope) {
+func (p Proto) onMess(peer *domain.Peer, envelope *Envelope) {
 	envelope.Content = Decrypt(envelope.Content, peer.SharedKey.Secret)
 	p.Broker <- envelope
 }
 
-func (p Proto) onList(peer *Peer, envelope *Envelope) {
+func (p Proto) onList(peer *domain.Peer, envelope *Envelope) {
 	log.Printf("onList")
 }

@@ -8,22 +8,26 @@ import (
 	"io"
 	"log"
 	"reflect"
+
+	"github.com/aridae/p2p-messenger-coursework/backendv2/controllers"
+	"github.com/aridae/p2p-messenger-coursework/backendv2/domain"
 )
 
 //Proto Ядро протокола
 type Proto struct {
+	PeerController *controllers.PeerController
+
 	Port     int
 	Name     string
-	Peers    *Peers
 	PubKey   ed25519.PublicKey
 	privKey  ed25519.PrivateKey
 	Broker   chan *Envelope
-	handlers map[string]func(peer *Peer, envelope *Envelope)
+	handlers map[string]func(peer *domain.Peer, envelope *Envelope)
 }
 
 //MyName return current peer name with public key
-func (p Proto) MyName() *PeerName {
-	return &PeerName{
+func (p Proto) MyName() *domain.PeerName {
+	return &domain.PeerName{
 		Name:   p.Name,
 		PubKey: hex.EncodeToString(p.PubKey),
 	}
@@ -33,37 +37,16 @@ func (p Proto) String() string {
 	return "proto: " + hex.EncodeToString(p.PubKey) + ": " + p.Name
 }
 
-// func getSeed() []byte {
-// 	seed := getRandomSeed(32)
-// 	fName := "seed.dat"
-// 	file, err := os.Open(fName)
-// 	if err != nil {
-// 		if os.IsNotExist(err) {
-// 			file, err = os.Create(fName)
-// 			if err != nil {
-// 				panic(err)
-// 			}
-// 		}
-// 	}
-// 	_, err = file.Read(seed)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	return seed
-// }
-
 //NewProto - создание экземпляра ядра протокола
 func NewProto(name string, port int) *Proto {
-	//privateKey := ed25519.NewKeyFromSeed(getSeed())
 	publicKey, privateKey := LoadKey(name)
 	proto := &Proto{
 		Port:     port,
 		Name:     name,
-		Peers:    NewPeers(),
 		PubKey:   publicKey,
 		privKey:  privateKey,
 		Broker:   make(chan *Envelope),
-		handlers: make(map[string]func(peer *Peer, envelope *Envelope)),
+		handlers: make(map[string]func(peer *domain.Peer, envelope *Envelope)),
 	}
 
 	// Обработчики конвертов
@@ -75,7 +58,7 @@ func NewProto(name string, port int) *Proto {
 }
 
 //SendName Отправка своего имени в сокет
-func (p Proto) SendName(peer *Peer) {
+func (p Proto) SendName(peer *domain.Peer) {
 
 	exchPubKey, exchPrivKey := CreateKeyExchangePair()
 
@@ -95,19 +78,19 @@ func (p Proto) SendName(peer *Peer) {
 }
 
 //RequestPeers Запрос списка пиров
-func (p Proto) RequestPeers(peer *Peer) {
+func (p Proto) RequestPeers(peer *domain.Peer) {
 	envelope := NewEnvelope("LIST", []byte("TODO"))
 	envelope.Send(peer)
 }
 
 //SendPeers Отправка списка пиров
-func (p Proto) SendPeers(peer *Peer) {
+func (p Proto) SendPeers(peer *domain.Peer) {
 	envelope := NewEnvelope("PEER", []byte("TODO"))
 	envelope.Send(peer)
 }
 
 //SendMessage Отправка сообщения
-func (p Proto) SendMessage(peer *Peer, msg string) {
+func (p Proto) SendMessage(peer *domain.Peer, msg string) {
 	if peer.SharedKey.Secret == nil {
 		log.Fatalf("can't send message!")
 	}
@@ -120,41 +103,41 @@ func (p Proto) SendMessage(peer *Peer, msg string) {
 }
 
 //RegisterPeer Регистрация пира в списках пиров
-func (p Proto) RegisterPeer(peer *Peer) *Peer {
-	// TODO: сравнение через equal
+func (p Proto) RegisterPeer(peer *domain.Peer) *domain.Peer {
 	if reflect.DeepEqual(peer.PubKey, p.PubKey) {
 		return nil
 	}
 
-	p.Peers.Put(peer)
-
-	log.Printf("Register new peer: %s (%v)", peer.Name, len(p.Peers.peers))
-
+	_, err := p.PeerController.AddPeer(peer)
+	if err != nil {
+		return nil
+	}
 	return peer
 }
 
 //UnregisterPeer Удаление пира из списка
-func (p Proto) UnregisterPeer(peer *Peer) {
-	if p.Peers.Remove(peer) {
+func (p Proto) UnregisterPeer(peer *domain.Peer) {
+	err := p.PeerController.RemovePeer(string(peer.PubKey))
+	if err == nil {
 		log.Printf("UnRegister peer: %s", peer.Name)
 	}
 }
 
 //ListenPeer Старт прослушивания соединения с пиром
-func (p Proto) ListenPeer(peer *Peer) {
+func (p Proto) ListenPeer(peer *domain.Peer) {
 	readWriter := bufio.NewReadWriter(bufio.NewReader(*peer.Conn), bufio.NewWriter(*peer.Conn))
 	p.HandleProto(readWriter, peer)
 }
 
 //HandleProto Обработка входящих сообщений
-func (p Proto) HandleProto(rw *bufio.ReadWriter, peer *Peer) {
+func (p Proto) HandleProto(rw *bufio.ReadWriter, peer *domain.Peer) {
 	for {
 		envelope, err := ReadEnvelope(rw.Reader)
 		if err != nil {
 			if err != io.EOF {
 				log.Printf("Error on read Envelope: %v", err)
 			}
-			log.Printf("Disconnect peer %s", peer)
+			log.Printf("Disconnect peer %+v", peer)
 			break
 		}
 

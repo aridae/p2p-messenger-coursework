@@ -11,7 +11,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/aridae/p2p-messenger-coursework/backend/proto"
+	"github.com/aridae/p2p-messenger-coursework/backendv2/domain"
+	"github.com/aridae/p2p-messenger-coursework/backendv2/transport/proto"
 )
 
 var peers = make(map[string]string)
@@ -132,8 +133,8 @@ func listenMeow(address string, p *proto.Proto, handler func(p *proto.Proto, pee
 		}
 
 		// Если с этим пиром уже есть связь, то пропускаем его
-		_, found := p.Peers.Get(string(peerPubKey))
-		if found || bytes.Equal(p.PubKey, peerPubKey) {
+		_, err = p.PeerController.GetPeer(string(peerPubKey))
+		if err == nil || bytes.Equal(p.PubKey, peerPubKey) {
 			continue
 		}
 
@@ -144,9 +145,9 @@ func listenMeow(address string, p *proto.Proto, handler func(p *proto.Proto, pee
 }
 
 // Отправляем пиру свое имя и ожидаем от него его имя
-func handShake(p *proto.Proto, conn net.Conn) *proto.Peer {
+func handShake(p *proto.Proto, conn net.Conn) *domain.Peer {
 	log.Printf("DISCOVERY: try handshake with %s", conn.RemoteAddr())
-	peer := proto.NewPeer(conn)
+	peer := domain.NewPeer(conn)
 
 	p.SendName(peer)
 
@@ -157,41 +158,16 @@ func handShake(p *proto.Proto, conn net.Conn) *proto.Peer {
 	}
 
 	if string(envelope.Cmd) == "HAND" {
-		if _, found := p.Peers.Get(string(envelope.From)); found {
-			log.Printf(" - - - - - - - - - - - - - - - --  -- - - - - Peer (%s) already exist", peer)
+		if _, err := p.PeerController.GetPeer(string(envelope.From)); err == nil {
+			log.Printf(" - - - - - - - - - - - - - - - --  -- - - - - Peer (%s) already exist", peer.Name)
 			return nil
 		}
 	}
 
-	err = peer.UpdatePeer(envelope)
+	err = proto.UpdatePeer(peer, envelope)
 	if err != nil {
 		log.Printf("HandShake error: %s", err)
 	}
 
 	return peer
 }
-
-// func iface() {
-// 	ifaces, err := net.Interfaces()
-// 	if err != nil {
-// 		log.Printf(err.Error())
-// 		return
-// 	}
-// 	var addrs = make(map[string]net.Interface)
-// 	for _, i := range ifaces {
-// 		multicastAddrs, err := i.MulticastAddrs()
-// 		if err != nil {
-// 			log.Printf(err.Error())
-// 			continue
-// 		}
-// 		for _, a := range multicastAddrs {
-// 			addrs[a.String()] = i
-// 			log.Printf("%v\n", a.String())
-// 		}
-// 	}
-
-// 	log.Printf("=====")
-// 	for k := range addrs {
-// 		log.Printf("%v", k)
-// 	}
-// }

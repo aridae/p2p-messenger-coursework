@@ -98,30 +98,32 @@ func (p *Peer) UpdatePeer(envelope *Envelope) error {
 }
 
 //Peers synchronised list of peers
+// Явно указано, что пирс реализует
 type Peers struct {
-	sync.RWMutex
+	rwmux *sync.RWMutex
 	peers map[string]*Peer
 }
 
 //NewPeers create new list of peers
 func NewPeers() *Peers {
 	return &Peers{
+		rwmux: new(sync.RWMutex),
 		peers: make(map[string]*Peer),
 	}
 }
 
 //Put put new peer to list
 func (p Peers) Put(peer *Peer) {
-	p.Lock()
-	defer p.Unlock()
+	p.rwmux.Lock()
+	defer p.rwmux.Unlock()
 
 	p.peers[string(peer.PubKey)] = peer
 }
 
 //Get find and get peer in list
 func (p Peers) Get(key string) (peer *Peer, found bool) {
-	p.RLock()
-	defer p.RUnlock()
+	p.rwmux.RLock()
+	defer p.rwmux.RUnlock()
 
 	peer, found = p.peers[key]
 	return
@@ -129,8 +131,8 @@ func (p Peers) Get(key string) (peer *Peer, found bool) {
 
 //Remove remove peer from list
 func (p Peers) Remove(peer *Peer) (found bool) {
-	p.RLock()
-	defer p.RUnlock()
+	p.rwmux.RLock()
+	defer p.rwmux.RUnlock()
 
 	delete(p.peers, string(peer.PubKey))
 	return

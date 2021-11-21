@@ -1,4 +1,4 @@
-package proto
+package cipher
 
 import (
 	"bytes"
