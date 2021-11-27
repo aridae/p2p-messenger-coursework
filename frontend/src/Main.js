@@ -157,6 +157,18 @@ export default class Main extends Component {
         return (
             <Container className={"d-flex h-100"} fluid>
                 <Row className={"flex-fill flex-columns"}>
+                    <Col xs={9} className={"messages d-flex align-content-end flex-column"}>
+                        <Row className={"mb-auto pl-3 chat-header"}>
+                            <h3>Chat {interlocutorName}</h3>
+                        </Row>
+                        <Row className={" scroll-on-overflow"}>
+                            <Messages
+                            messages={this.state.interlocutor ? (this.state.messages[this.state.interlocutor.id]): []}/>
+                        </Row>
+                        <Row className={"chat-footer"}>
+                            <MessageInput interlocutor={this.state.interlocutor} onSendMessage={this.sendMessage}/>
+                        </Row>
+                    </Col>
                     <Col xs={3} className={"d-flex flex-column"}>
                         <Row className={"peer-header"}>
                             <Col>
@@ -170,20 +182,8 @@ export default class Main extends Component {
                         </Row>
                         <Row className={"mt-auto peer-header"}>
                             <Col>
-                                <Button color="info" size={"sm"} onClick={this.updatePeers}>update peers</Button>
+                                <Button color="light" size={"sm"} onClick={this.updatePeers}>update peers</Button>
                             </Col>
-                        </Row>
-                    </Col>
-                    <Col xs={9} className={"messages d-flex align-content-end flex-column"}>
-                        <Row className={"mb-auto pl-3 chat-header"}>
-                            <h3>Chat {interlocutorName}</h3>
-                        </Row>
-                        <Row className={" scroll-on-overflow"}>
-                            <Messages
-                            messages={this.state.interlocutor ? (this.state.messages[this.state.interlocutor.id]): []}/>
-                        </Row>
-                        <Row className={"chat-footer"}>
-                            <MessageInput interlocutor={this.state.interlocutor} onSendMessage={this.sendMessage}/>
                         </Row>
                     </Col>
                 </Row>

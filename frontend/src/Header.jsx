@@ -22,7 +22,7 @@ export default class Header extends Component {
         return (
             <header>
                 <Navbar className={"messenger-navbar"}>
-                    <NavbarBrand href="/" className="mr-auto">PeerToPeer Messenger</NavbarBrand>
+                    <NavbarBrand href="/" className="mr-auto">Zefir2Peer Messenger</NavbarBrand>
                 </Navbar>
             </header>
         )

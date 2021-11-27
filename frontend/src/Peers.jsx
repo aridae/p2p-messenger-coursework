@@ -29,7 +29,7 @@ export default class Peers extends Component {
     render() {
         if (!Object.keys(this.props.peers).length) {
             return (
-                <div>empty :(</div>
+                <div>You don't have active peers</div>
             )
         }
         return (
