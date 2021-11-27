@@ -18,6 +18,7 @@ func toJson(v interface{}) []byte {
 }
 
 //PeerName Peer name and public key
+// во всем проекте public key используется в роли айдишника
 type PeerName struct {
 	Name   string `json:"name"`
 	PubKey string `json:"id"`
