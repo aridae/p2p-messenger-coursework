@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  zefeer_1:
+    image: localhost/zefeer
+    restart: unless-stopped
+    ports:
+      - "35035:35035"
+    host: 192.168.1.70
+    networks:
+      - app-network
+  zefeer_2:
+    image: localhost/zefeer
+    depends_on:
+      - zefeer_1
+    restart: unless-stopped
+    ports:
+      - "35035:35035"
+    host: 192.168.0.188
+    networks:
+      - app-network
+  zefeer_2_front:
+    image: localhost/zefeer_front
+    depends_on:
+      - zefeer_2
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    host: 192.168.0.188
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge

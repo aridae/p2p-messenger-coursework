@@ -1,4 +1,4 @@
-package cipher
+package zefeer2peer
 
 import (
 	"bytes"

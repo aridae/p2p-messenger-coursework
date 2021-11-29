@@ -5,12 +5,14 @@ import Peers from "./Peers";
 import MessageInput from "./MessageInput";
 import Messages from "./Messages";
 
-
 import update from 'immutability-helper';
 
+
+const UNAME = "UNAME";
+const PEERS = "PEERS";
+const MESSG = "MESSG";
+
 export default class Main extends Component {
-
-
     constructor(props, context) {
         super(props, context);
 
@@ -24,17 +26,17 @@ export default class Main extends Component {
     }
 
     componentDidMount() {
+        // еб-сокет для общения с бэком 
         let socket = new WebSocket("ws://" + document.location.hostname + (document.location.port ? ':' + document.location.port : '') + "/ws");
 
         this.setState({socket: socket}, () => {
             socket.onopen = function () {
                 console.log("Соединение установлено.");
-                socket.send(JSON.stringify({cmd: "HELLO"}));
-                socket.send(JSON.stringify({cmd: "PEERS"}));
+                socket.send(JSON.stringify({cmd: UNAME}));
+                socket.send(JSON.stringify({cmd: PEERS}));
             };
 
             socket.onmessage = this.onMessage;
-
             socket.onclose = function (event) {
                 if (event.wasClean) {
                     console.log('Соединение закрыто чисто');
@@ -66,11 +68,11 @@ export default class Main extends Component {
 
     handler = (msgObj) => {
         switch (msgObj.cmd) {
-            case "NAME" : {
+            case UNAME : {
                 this.setState({iam: {name: msgObj.name, id: msgObj.id}})
                 break;
             }
-            case "PEERS" : {
+            case PEERS : {
                 let peers = {};
                 msgObj.peers.forEach((p) => {
                     let v = this.state.peers[p.id];
@@ -80,7 +82,7 @@ export default class Main extends Component {
                 this.setState({peers: peers});
                 return;
             }
-            case "MESS" : {
+            case MESSG : {
                 let peerId = "";
                 let fromName = "";
                 let counter = 0;
@@ -114,9 +116,7 @@ export default class Main extends Component {
                 };
 
                 oldMessages.push(message);
-
                 console.log(oldMessages);
-
                 this.setState({
                     peers: update(this.state.peers, {[peerId]: {counter: {$set: counter}}}),
                     messages: update(this.state.messages, {[peerId]: {$set: oldMessages}})
@@ -131,12 +131,12 @@ export default class Main extends Component {
 
 
     updatePeers = () => {
-        this.state.socket.send(JSON.stringify({cmd: "PEERS"}));
+        this.state.socket.send(JSON.stringify({cmd: PEERS}));
     };
 
     sendMessage = (msg) => {
         let cmd = JSON.stringify({
-            cmd: "MESS",
+            cmd: MESSG,
             from: this.state.iam.id,
             to: this.state.interlocutor.id,
             content: msg
