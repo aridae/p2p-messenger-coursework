@@ -61,12 +61,14 @@ func (wszefeer *WSZefeerService) InitServiceConnections(peersFile string) {
 
 	for _, peerAddress := range savedPeers {
 		log.Printf("try to connect peer: %s", peerAddress)
-		conn, err := net.Dial("tcp", peerAddress)
+		log.Println("JOPAAAAAAAAAA", wszefeer.ZefeerClient.Conn)
+		conn, err := net.DialTCP("tcp", peerAddress)
 		if err != nil {
 			log.Printf("Dial ERROR: " + err.Error())
 			return
 		}
 		newPeer := zefeer2peer.NewPeer(conn)
+		log.Println("JOPA^", newPeer.PubKey)
 		wszefeer.ZefeerClient.RegisterPeer(newPeer)
 		wszefeer.ZefeerClient.SendZPINGReq(newPeer)
 	}

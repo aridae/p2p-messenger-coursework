@@ -2,6 +2,7 @@ package zefeer2peer
 
 import (
 	"sync"
+	"log"
 )
 
 type HashKey string
@@ -59,6 +60,7 @@ func (p PeersHashTable) Empty() {
 func (p PeersHashTable) ToList() []PeerName {
 	names := make([]PeerName, 0)
 	for k, v := range p.peers {
+		log.Println("JOPA^*:", k, v)
 		names = append(names, PeerName{
 			PubKey: string(k),
 			Name:   v.Name,

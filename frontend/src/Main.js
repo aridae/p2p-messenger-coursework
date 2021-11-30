@@ -28,7 +28,7 @@ export default class Main extends Component {
     componentDidMount() {
         // еб-сокет для общения с бэком 
         let socket = new WebSocket("ws://" + document.location.hostname + (document.location.port ? ':' + document.location.port : '') + "/ws");
-
+        console.log(socket)
         this.setState({socket: socket}, () => {
             socket.onopen = function () {
                 console.log("Соединение установлено.");
@@ -55,13 +55,14 @@ export default class Main extends Component {
 
 
     onMessage = (event) => {
-        console.log("Получены данные " + event.data);
+        console.log("Получены данные FFFFFFFFFFFFFFF" + event.data);
         let parsedMessage = JSON.parse(event.data);
 
         if (!parsedMessage.cmd) {
             console.error("something wrong with data");
             return;
         }
+        console.log("Жопа")
 
         this.handler(parsedMessage);
     };
@@ -131,6 +132,9 @@ export default class Main extends Component {
 
 
     updatePeers = () => {
+        console.log("update");
+        console.log(PEERS)
+        console.log(JSON.stringify({cmd: PEERS}))
         this.state.socket.send(JSON.stringify({cmd: PEERS}));
     };
 
