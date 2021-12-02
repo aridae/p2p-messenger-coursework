@@ -46,6 +46,13 @@ type PeerMESSG struct {
 	Message string `json:"message"`
 }
 
+type PeerMESSGBuffed struct {
+	Name    string `json:"name"`
+	PubKey  string `json:"id"`
+	ExKey   string `json:"exKey"`
+	Message string `json:"message"`
+}
+
 //ToJson convert to JSON bytes
 func (v PeerMESSG) ToJson() []byte {
 	return toJson(v)

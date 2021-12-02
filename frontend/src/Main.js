@@ -11,6 +11,7 @@ import update from 'immutability-helper';
 const UNAME = "UNAME";
 const PEERS = "PEERS";
 const MESSG = "MESSG";
+const MESSG = "STORY"; // {cmd=strory messages[{from, datetime, content}]}
 
 export default class Main extends Component {
     constructor(props, context) {

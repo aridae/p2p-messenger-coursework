@@ -43,8 +43,6 @@ type Peer struct {
 	LastSeen  string
 	SharedKey SharedKey
 	MESSGBUF  chan *Envelope
-	// ввести очередь сообщений от этого пира
-	// нашему клиенту
 }
 
 func (p Peer) String() string {

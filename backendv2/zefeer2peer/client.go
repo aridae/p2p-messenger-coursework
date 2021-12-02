@@ -195,6 +195,7 @@ func (zefeer ZefeerClient) onZPINGReq(peer *Peer, envelope *Envelope) {
 	} else {
 		oldPeer, found := zefeer.Peers.Get(HashKey(peer.PubKey))
 		if found {
+			fmt.Printf("ZEFEER JOPA ALREADY EXISTS %+v\n", zefeer.Peers.peers)
 			oldPeer.Name = newPeer.Name
 			oldPeer.PubKey = newPeer.PubKey
 			oldPeer.SharedKey = newPeer.SharedKey
