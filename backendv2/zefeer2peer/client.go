@@ -70,7 +70,7 @@ func (p ZefeerClient) RegisterPeer(peer *Peer) *Peer {
 	// }
 
 	p.Peers.Put(peer)
-	log.Printf("Register new peer: %s (%v)", peer.Name, len(p.Peers.peers))
+	log.Printf("Register new peer JOPA: %s %s(%v)", peer.Name, peer.PubKey, len(p.Peers.peers))
 	return peer
 }
 

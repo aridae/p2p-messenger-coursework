@@ -67,17 +67,23 @@ func (wszefeer *WSZefeerService) InitServiceConnections(peersFile string) {
 
 	self := "localhost:" + strconv.Itoa(wszefeer.ZefeerClient.Port)
 	for _, peerAddress := range savedPeers {
-		log.Printf("try to connect %s peer: %s", self, peerAddress)
-		conn, err := netp2p.Dial("tcp", self, peerAddress)
+		log.Printf("try to connect peer: %s", peerAddress)
+		log.Println("JOPAAAAAAAAAA", wszefeer.ZefeerClient.Conn)
+		conn, err := net.DialTCP("tcp", peerAddress)
 		if err != nil {
 			log.Printf("Dial ERROR: " + err.Error())
 			return
 		}
 		newPeer := zefeer2peer.NewPeer(conn)
+<<<<<<< HEAD
 		reader := bufio.NewReader(conn)
 		writer := bufio.NewWriter(conn)
 		readWriter := bufio.NewReadWriter(reader, writer)
 
+=======
+		log.Println("JOPA^", newPeer.PubKey)
+		wszefeer.ZefeerClient.RegisterPeer(newPeer)
+>>>>>>> 18fc8fa4a671cd2b3432748c4db342e4e1fb1c60
 		wszefeer.ZefeerClient.SendZPINGReq(newPeer)
 		go wszefeer.ZefeerClient.HandleIncomingTraffic(readWriter, newPeer)
 	}
