@@ -67,9 +67,9 @@ func NewProto(name string, port int) *Proto {
 	}
 
 	// Обработчики конвертов
-	proto.handlers["HAND"] = proto.onHand
-	proto.handlers["MESS"] = proto.onMess
-	proto.handlers["LIST"] = proto.onList
+	proto.handlers["HANDP"] = proto.onHand
+	proto.handlers["MESSG"] = proto.onMess
+	proto.handlers["LISTP"] = proto.onList
 
 	return proto
 }
@@ -89,20 +89,20 @@ func (p Proto) SendName(peer *Peer) {
 
 	sign := ed25519.Sign(p.privKey, handShake)
 
-	envelope := NewSignedEnvelope("HAND", p.PubKey[:], make([]byte, 32), sign, handShake)
+	envelope := NewSignedEnvelope("HANDP", p.PubKey[:], make([]byte, 32), sign, handShake)
 
 	envelope.Send(peer)
 }
 
 //RequestPeers Запрос списка пиров
 func (p Proto) RequestPeers(peer *Peer) {
-	envelope := NewEnvelope("LIST", []byte("TODO"))
+	envelope := NewEnvelope("LISTP", []byte("TODO"))
 	envelope.Send(peer)
 }
 
 //SendPeers Отправка списка пиров
 func (p Proto) SendPeers(peer *Peer) {
-	envelope := NewEnvelope("PEER", []byte("TODO"))
+	envelope := NewEnvelope("PEERS", []byte("TODO"))
 	envelope.Send(peer)
 }
 
@@ -113,9 +113,7 @@ func (p Proto) SendMessage(peer *Peer, msg string) {
 	}
 
 	encryptedMessage := Encrypt([]byte(msg), peer.SharedKey.Secret)
-
-	envelope := NewSignedEnvelope("MESS", p.PubKey, peer.PubKey, ed25519.Sign(p.privKey, encryptedMessage), encryptedMessage)
-
+	envelope := NewSignedEnvelope("MESSG", p.PubKey, peer.PubKey, ed25519.Sign(p.privKey, encryptedMessage), encryptedMessage)
 	envelope.Send(peer)
 }
 

@@ -1,6 +1,7 @@
 package zefeer2peer
 
 import (
+	"strings"
 	"sync"
 )
 
@@ -29,12 +30,16 @@ func (p PeersHashTable) Put(peer *Peer) {
 	p.peers[HashKey(peer.PubKey)] = peer
 }
 
-func (p PeersHashTable) Get(key HashKey) (peer *Peer, found bool) {
+func (p PeersHashTable) Get(key HashKey) (*Peer, bool) {
 	p.rwmux.RLock()
 	defer p.rwmux.RUnlock()
 
-	peer, found = p.peers[key]
-	return
+	for k, v := range p.peers {
+		if strings.EqualFold(string(k), string(key)) {
+			return v, true
+		}
+	}
+	return nil, false
 }
 
 func (p PeersHashTable) Remove(peer *Peer) (found bool) {

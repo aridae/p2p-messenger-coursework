@@ -156,7 +156,7 @@ func handShake(p *proto.Proto, conn net.Conn) *proto.Peer {
 		return nil
 	}
 
-	if string(envelope.Cmd) == "HAND" {
+	if string(envelope.Cmd) == "HANDP" {
 		if _, found := p.Peers.Get(string(envelope.From)); found {
 			log.Printf(" - - - - - - - - - - - - - - - --  -- - - - - Peer (%s) already exist", peer)
 			return nil

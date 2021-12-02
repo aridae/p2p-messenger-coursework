@@ -68,7 +68,7 @@ func NewPeer(conn net.Conn) *Peer {
 
 //UpdatePeer Update peer struct after handshake
 func (p *Peer) UpdatePeer(envelope *Envelope) error {
-	if string(envelope.Cmd) != "HAND" {
+	if string(envelope.Cmd) != "HANDP" {
 		return errors.New("invalid command")
 	}
 

@@ -71,7 +71,7 @@ func handleWs(w http.ResponseWriter, r *http.Request, p *proto.Proto) {
 
 				writeToWs(c, mt, peerListJson)
 			}
-		case "MESS":
+		case "MESSG":
 			{
 				hexPubKey, err := hex.DecodeString(decodedMessage.To)
 				if err != nil {
@@ -98,11 +98,11 @@ func waitMessageForWs(p *proto.Proto, c *websocket.Conn, br chan bool) {
 		case envelope := <-p.Broker:
 			{
 				log.Printf("New message: %s", envelope.Cmd)
-				if string(envelope.Cmd) == "MESS" {
+				if string(envelope.Cmd) == "MESSG" {
 
 					wsCmd := proto.WsMessage{
 						WsCmd: proto.WsCmd{
-							Cmd: "MESS",
+							Cmd: "MESSG",
 						},
 						From:    hex.EncodeToString(envelope.From),
 						To:      hex.EncodeToString(envelope.To),

@@ -12,12 +12,14 @@ import (
 	"os"
 	"os/signal"
 	"path"
+	"strconv"
 	"syscall"
 
 	"github.com/aridae/p2p-messenger-coursework/backend/proto"
 	config "github.com/aridae/p2p-messenger-coursework/backendv2/config"
 	"github.com/aridae/p2p-messenger-coursework/backendv2/zefeer2peer"
 	"github.com/gorilla/websocket"
+	netp2p "github.com/libp2p/go-reuseport"
 )
 
 type BROWSER_COMMAND string
@@ -46,6 +48,10 @@ func NewWSZefeerService(options *config.ClientOptions) *WSZefeerService {
 	}
 }
 
+func (wszefeer *WSZefeerService) self() string {
+	return "localhost:" + strconv.Itoa(wszefeer.ZefeerClient.Port)
+}
+
 func (wszefeer *WSZefeerService) InitServiceConnections(peersFile string) {
 	file, err := os.Open(peersFile)
 	if err != nil {
@@ -59,16 +65,21 @@ func (wszefeer *WSZefeerService) InitServiceConnections(peersFile string) {
 		savedPeers = append(savedPeers, scanner.Text())
 	}
 
+	self := "localhost:" + strconv.Itoa(wszefeer.ZefeerClient.Port)
 	for _, peerAddress := range savedPeers {
-		log.Printf("try to connect peer: %s", peerAddress)
-		conn, err := net.Dial("tcp", peerAddress)
+		log.Printf("try to connect %s peer: %s", self, peerAddress)
+		conn, err := netp2p.Dial("tcp", self, peerAddress)
 		if err != nil {
 			log.Printf("Dial ERROR: " + err.Error())
 			return
 		}
 		newPeer := zefeer2peer.NewPeer(conn)
-		wszefeer.ZefeerClient.RegisterPeer(newPeer)
+		reader := bufio.NewReader(conn)
+		writer := bufio.NewWriter(conn)
+		readWriter := bufio.NewReadWriter(reader, writer)
+
 		wszefeer.ZefeerClient.SendZPINGReq(newPeer)
+		go wszefeer.ZefeerClient.HandleIncomingTraffic(readWriter, newPeer)
 	}
 }
 
@@ -88,20 +99,13 @@ func (wszefeer *WSZefeerService) StartServing(peersFile string) {
 	}()
 
 	log.Println("in StartServing")
-	service := fmt.Sprintf("0.0.0.0:%v", wszefeer.ZefeerClient.Port)
-	tcpAddr, err := net.ResolveTCPAddr("tcp", service)
-	if err != nil {
-		log.Printf("ResolveTCPAddr: %s", err.Error())
-		os.Exit(1)
-	}
-	// слушаем соединения
-	// !!!!!!!!!!!!!!!!!!
-	listener, err := net.ListenTCP("tcp", tcpAddr)
+	self := wszefeer.self()
+	listener, err := netp2p.Listen("tcp", self)
 	if err != nil {
 		log.Printf("ListenTCP: %s", err.Error())
 		os.Exit(1)
 	}
-	fmt.Printf("\n\tService start on %s\n\n", tcpAddr.String())
+	fmt.Printf("\n\tService start on %s\n\n", self)
 
 	wszefeer.InitServiceConnections(peersFile)
 	for {
@@ -110,7 +114,6 @@ func (wszefeer *WSZefeerService) StartServing(peersFile string) {
 		if err != nil {
 			continue
 		}
-		// TODO
 		go wszefeer.onConnection(conn, wszefeer.ZefeerClient)
 	}
 }
@@ -140,7 +143,7 @@ func (wszefeer *WSZefeerService) HandleHTTPTraffic(rw *bufio.ReadWriter, conn ne
 	// для этого нужно смапить пришедший нам хттп запрос
 	// на команды, которые известны нашему зефир-клиенту
 	if path.Clean(request.URL.Path) == "/ws" {
-		wszefeer.mapHTTPToZefeerTraffic(NewWSZefeerWriter(conn), request)
+		wszefeer.mapHTTPToZefeerTraffic(rw, NewWSZefeerWriter(conn), request)
 		return
 	}
 
@@ -158,7 +161,7 @@ func (wszefeer *WSZefeerService) HandleHTTPTraffic(rw *bufio.ReadWriter, conn ne
 	}
 }
 
-func (wszefeer *WSZefeerService) mapHTTPToZefeerTraffic(w http.ResponseWriter, r *http.Request) {
+func (wszefeer *WSZefeerService) mapHTTPToZefeerTraffic(rw *bufio.ReadWriter, w http.ResponseWriter, r *http.Request) {
 	wsconnection, err := wszefeer.upgrader.Upgrade(w, r, w.Header())
 	if err != nil {
 		log.Print("upgrade:", err)
@@ -192,14 +195,22 @@ func (wszefeer *WSZefeerService) mapHTTPToZefeerTraffic(w http.ResponseWriter, r
 		// надо отправить его пиру
 		case string(MESSG):
 			{
-				hexPubKey, err := hex.DecodeString(browserEnvelope.To)
-				if err != nil {
-					log.Printf("decode error: %s", err)
-					continue
-				}
+				fmt.Printf("JOPPA ENVELOPPA %+v\n", browserEnvelope)
+				hexPubKey := browserEnvelope.To
+				// if err != nil {
+				// 	log.Printf("decode error: %s", err)
+				// 	continue
+				// }
 				peer, found := wszefeer.ZefeerClient.Peers.Get(zefeer2peer.HashKey(hexPubKey))
 				if found {
+					fmt.Printf("JOPA FOUND!")
 					wszefeer.ZefeerClient.SendMESSG(peer, browserEnvelope.Content)
+					//wszefeer.ZefeerClient.HandleIncomingTraffic(rw, peer)
+				}
+
+				err := wsconnection.WriteMessage(wsMessageType, browserEnvelope.ToJson())
+				if err != nil {
+					log.Printf("ws write error: %s", err)
 				}
 			}
 		// браузер запрашивает список пиров
@@ -213,8 +224,17 @@ func (wszefeer *WSZefeerService) mapHTTPToZefeerTraffic(w http.ResponseWriter, r
 
 				peers := wszefeer.ZefeerClient.Peers.ToList()
 				log.Printf("our PEERS: %+v", peers)
+				for _, p := range peers {
+					fmt.Println("JO Pa !", p.PubKey)
+				}
 
-				peerListJson, _ := json.Marshal(peers)
+				wsPeerList := &WSPeerList{
+					WSZefeerCmd: WSZefeerCmd{
+						Cmd: string(PEERS),
+					},
+					Peers: peers,
+				}
+				peerListJson, _ := json.Marshal(wsPeerList)
 				log.Printf("writing peers to wsconnection...")
 				err := wsconnection.WriteMessage(wsMessageType, peerListJson)
 				if err != nil {

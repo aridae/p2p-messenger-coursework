@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-var cmdLen = 4
+var cmdLen = 5
 var idLen = 16
 var fromLen = 32
 var toLen = 32

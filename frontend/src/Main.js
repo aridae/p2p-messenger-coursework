@@ -69,12 +69,18 @@ export default class Main extends Component {
     handler = (msgObj) => {
         switch (msgObj.cmd) {
             case UNAME : {
+                console.log("Получены данные JOPA UNAME " + msgObj);
                 this.setState({iam: {name: msgObj.name, id: msgObj.id}})
                 break;
             }
             case PEERS : {
+                console.log("Получены данные JOPA PEERS " + msgObj);
+
                 let peers = {};
                 msgObj.peers.forEach((p) => {
+                    console.log("Получены данные JOPA PEERS p " + p);
+
+
                     let v = this.state.peers[p.id];
                     p.counter = v ? v.counter : 0;
                     peers[p.id] = p
@@ -83,6 +89,8 @@ export default class Main extends Component {
                 return;
             }
             case MESSG : {
+                console.log("Получены данные JOPA MESSG" + msgObj);
+
                 let peerId = "";
                 let fromName = "";
                 let counter = 0;
@@ -131,6 +139,8 @@ export default class Main extends Component {
 
 
     updatePeers = () => {
+        console.log("updatePeers JOPA REQUEST!!!!!!~!");
+
         this.state.socket.send(JSON.stringify({cmd: PEERS}));
     };
 
