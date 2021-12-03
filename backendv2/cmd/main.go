@@ -19,9 +19,11 @@ import (
 var (
 	peersPath *string
 	portInt   *int
+	uname     *string
 )
 
 func init() {
+	uname = flag.String("name", "zefeerchik", "your name")
 	peersPath = flag.String("peers", "./backendv2/config/peers1.txt", "Path to file with peer addresses on each line")
 	portInt = flag.Int("port", 35035, "port that have to listen")
 	flag.Parse()
@@ -34,6 +36,7 @@ func init() {
 func main() {
 	options := config.GetClientOptions()
 	options.Port = *portInt
+	options.Username = *uname
 	wszefeer := webserver.NewWSZefeerService(options)
 	startWithoutWebView(wszefeer)
 }

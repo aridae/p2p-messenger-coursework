@@ -35,6 +35,8 @@ type ZefeerClient struct {
 	PubKey  ed25519.PublicKey
 	privKey ed25519.PrivateKey
 
+	WSVisitor *WSVisitor
+
 	// WIP
 	Buffer    chan *Envelope
 	BufferOut chan *Envelope
@@ -46,13 +48,14 @@ type ZefeerClient struct {
 func NewZefeerClient(options *config.ClientOptions) *ZefeerClient {
 	publicKey, privateKey := LoadKey(options.Username)
 	client := &ZefeerClient{
-		Host:    options.Host,
-		Port:    options.Port,
-		Name:    options.Username,
-		Peers:   NewPeersHashTable(),
-		PubKey:  publicKey,
-		privKey: privateKey,
-		Buffer:  make(chan *Envelope),
+		Host:      options.Host,
+		Port:      options.Port,
+		Name:      options.Username,
+		Peers:     NewPeersHashTable(),
+		PubKey:    publicKey,
+		privKey:   privateKey,
+		WSVisitor: NewWSVisitor(),
+		Buffer:    make(chan *Envelope),
 	}
 
 	return client
@@ -170,9 +173,9 @@ func (p ZefeerClient) SendMESSG(peer *Peer, message string) {
 	peer.SharedKey.Update(nil, exchPrivKey[:])
 	sign := ed25519.Sign(p.privKey, peersMesg)
 
-	envelope := NewSignedEnvelope(string(MESSG), string(REQUEST), p.PubKey[:], make([]byte, 32), sign, peersMesg)
+	envelope := NewSignedEnvelope(string(MESSG), string(REQUEST), p.PubKey[:], peer.PubKey[:], sign, peersMesg)
 	envelope.Send(peer)
-	//peer.MESSGBUF <- envelope
+	//peer.MESSGBUF <- p.MessageFromEnvelope(envelope)
 }
 
 // эта часть относится к пиру как к серверу
@@ -190,6 +193,7 @@ func (zefeer ZefeerClient) onZPINGReq(peer *Peer, envelope *Envelope) {
 	// получили запрос на зпинг от другого пира
 	newPeer := NewPeer(*peer.Conn)
 	err := newPeer.UpdatePeerOnZPING(envelope)
+	fmt.Printf("-----------> NEW PEER AFTER JOPA UPDATE %s", newPeer.PubKey)
 	if err != nil {
 		log.Printf("Update peer error: %s", err)
 	} else {
@@ -201,7 +205,7 @@ func (zefeer ZefeerClient) onZPINGReq(peer *Peer, envelope *Envelope) {
 			oldPeer.SharedKey = newPeer.SharedKey
 			oldPeer.LastSeen = time.Now().String()
 		} else {
-			zefeer.RegisterPeer(peer)
+			zefeer.RegisterPeer(newPeer)
 		}
 	}
 
@@ -281,14 +285,15 @@ func (zefeer ZefeerClient) onMESSG(peer *Peer, envelope *Envelope) {
 	log.Println("onMESSG")
 	//envelope.Body = Decrypt(envelope.Body, peer.SharedKey.Secret)
 
-	log.Println("Writing message to buffer...")
 	var peersMsg PeerMESSG
 	if err := json.Unmarshal(envelope.Body, &peersMsg); err != nil {
 		log.Println("unmarshalling error")
 		return
 	}
 	fmt.Printf("Got message %+v\n", peersMsg)
-	//zefeer.Buffer <- envelope
+
+	// visit front
+	zefeer.WSVisitor.VisitOnMESSG(envelope)
 }
 
 func (p ZefeerClient) HandleIncomingTraffic(rw *bufio.ReadWriter, peer *Peer) {

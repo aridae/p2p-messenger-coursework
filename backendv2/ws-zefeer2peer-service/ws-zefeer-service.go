@@ -28,6 +28,7 @@ const (
 	UNAME BROWSER_COMMAND = "UNAME" // send username to front
 	PEERS BROWSER_COMMAND = "PEERS" // send peers to front
 	MESSG BROWSER_COMMAND = "MESSG" // write message from front
+	STORY BROWSER_COMMAND = "STORY" // get history of old messages
 )
 
 type WSZefeerService struct {
@@ -167,7 +168,10 @@ func (wszefeer *WSZefeerService) mapHTTPToZefeerTraffic(rw *bufio.ReadWriter, w 
 		log.Print("upgrade:", err)
 		return
 	}
+	wszefeer.ZefeerClient.WSVisitor.UpdateOnConnect(wsconnection)
+
 	defer wsconnection.Close()
+	defer wszefeer.ZefeerClient.WSVisitor.UpdateOnConnect(nil)
 	defer log.Println("closing connection...")
 
 	quit := make(chan bool)

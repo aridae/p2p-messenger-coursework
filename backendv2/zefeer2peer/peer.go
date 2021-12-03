@@ -42,7 +42,7 @@ type Peer struct {
 	FirstSeen string
 	LastSeen  string
 	SharedKey SharedKey
-	MESSGBUF  chan *Envelope
+	MESSGBUF  chan *MessageBuffed
 }
 
 func (p Peer) String() string {
@@ -61,7 +61,7 @@ func NewPeer(conn net.Conn) *Peer {
 			LocalKey:  nil,
 			Secret:    nil,
 		},
-		MESSGBUF: make(chan *Envelope, 100),
+		MESSGBUF: make(chan *MessageBuffed, 100),
 	}
 }
 

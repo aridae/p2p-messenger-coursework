@@ -11,7 +11,6 @@ import update from 'immutability-helper';
 const UNAME = "UNAME";
 const PEERS = "PEERS";
 const MESSG = "MESSG";
-const MESSG = "STORY"; // {cmd=strory messages[{from, datetime, content}]}
 
 export default class Main extends Component {
     constructor(props, context) {
@@ -101,9 +100,18 @@ export default class Main extends Component {
                     // это наше сообщение
                     peerId = msgObj.to;
                     fromName = this.state.iam.name;
+                    console.log("SELF")
+                    console.log(this.state.peers[peerId])
+
+                    console.log(msgObj.to)
+                    console.log(msgObj.from)
+                    console.log(this.state.iam.id)
                 } else {
+                    // SDJSHUFTYSTDURSTDCTSYDUTSTDFSYDR
                     // это сообщение от другого пира
                     peerId = msgObj.from;
+                    console.log("FROM")
+                    console.log(this.state.peers[peerId])
                     let peer = this.state.peers[peerId];
                     if (peer) {
                         fromName = peer.name;
@@ -112,6 +120,10 @@ export default class Main extends Component {
                         fromName = msgObj.from.substr(0, 10);
                     }
                 }
+
+                console.log("fromName");
+                console.log(fromName);
+
 
                 let oldMessages = this.state.messages[peerId];
                 if (!oldMessages) {
@@ -125,12 +137,16 @@ export default class Main extends Component {
                     content: msgObj.content
                 };
 
+                console.log("1");
+
                 oldMessages.push(message);
                 console.log(oldMessages);
+                console.log("2");
                 this.setState({
-                    peers: update(this.state.peers, {[peerId]: {counter: {$set: counter}}}),
+                    peers: update(this.state.peers, {[peerId]: {counter: {$set: 0}}}),
                     messages: update(this.state.messages, {[peerId]: {$set: oldMessages}})
                 });
+                console.log("3 AFTER setState");
                 break;
             }
             default : {
@@ -147,6 +163,8 @@ export default class Main extends Component {
     };
 
     sendMessage = (msg) => {
+        console.log("sendMessage JOPA REQUEST!!!!!!~!");
+
         let cmd = JSON.stringify({
             cmd: MESSG,
             from: this.state.iam.id,
@@ -157,6 +175,8 @@ export default class Main extends Component {
     };
 
     selectPeer = (peer) => {
+        console.log("selectPeer JOPA REQUEST!!!!!!~!");
+
         this.setState({
             interlocutor: peer,
             peers: update(this.state.peers, {[peer.id]: {counter: {$set: 0}}}),

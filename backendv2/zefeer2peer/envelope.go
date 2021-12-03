@@ -39,6 +39,10 @@ type Envelope struct {
 	Body       []byte
 }
 
+func (v Envelope) ToJson() []byte {
+	return toJson(v)
+}
+
 func (m Envelope) String() string {
 	return string(m.Cmd) + "-" + string(m.Id) + "-" + strconv.FormatUint(uint64(m.BodyLength), 10)
 }
