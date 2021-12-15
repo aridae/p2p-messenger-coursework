@@ -73,7 +73,6 @@ func (p ZefeerClient) RegisterPeer(peer *Peer) *Peer {
 	// }
 
 	p.Peers.Put(peer)
-	log.Printf("Register new peer JOPA: %s %s(%v)", peer.Name, peer.PubKey, len(p.Peers.peers))
 	return peer
 }
 
@@ -188,18 +187,14 @@ func (p ZefeerClient) SendMESSG(peer *Peer, message string) {
 func (zefeer ZefeerClient) onZPINGReq(peer *Peer, envelope *Envelope) {
 	log.Println("onZPINGReq")
 
-	fmt.Printf("ZEFEER JOPA BEFORE %+v\n", zefeer.Peers.peers)
-
 	// получили запрос на зпинг от другого пира
 	newPeer := NewPeer(*peer.Conn)
 	err := newPeer.UpdatePeerOnZPING(envelope)
-	fmt.Printf("-----------> NEW PEER AFTER JOPA UPDATE %s", newPeer.PubKey)
 	if err != nil {
 		log.Printf("Update peer error: %s", err)
 	} else {
 		oldPeer, found := zefeer.Peers.Get(HashKey(peer.PubKey))
 		if found {
-			fmt.Printf("ZEFEER JOPA ALREADY EXISTS %+v\n", zefeer.Peers.peers)
 			oldPeer.Name = newPeer.Name
 			oldPeer.PubKey = newPeer.PubKey
 			oldPeer.SharedKey = newPeer.SharedKey
@@ -209,8 +204,6 @@ func (zefeer ZefeerClient) onZPINGReq(peer *Peer, envelope *Envelope) {
 		}
 	}
 
-	fmt.Printf("ZEFEER JOPA AFTER %+v\n", zefeer.Peers.peers)
-
 	// отправляем ему ответ
 	zefeer.SendZPINGResp(peer)
 }
@@ -218,15 +211,12 @@ func (zefeer ZefeerClient) onZPINGReq(peer *Peer, envelope *Envelope) {
 func (zefeer ZefeerClient) onZPINGResp(peer *Peer, envelope *Envelope) {
 	log.Println("onZPINGResp")
 
-	fmt.Printf("ZEFEER JOPA BEFORE %+v\n", zefeer.Peers.peers)
 	for k, v := range zefeer.Peers.peers {
 		fmt.Printf("%s - %s\n", string(k), v)
 	}
 	// получили ответ на наш зпинг
 	// обновляем информацию о пирах и все
-	fmt.Printf("ZEFEER JOPA BEFORE UPDATE %+v\n", peer)
 	err := peer.UpdatePeerOnZPING(envelope)
-	fmt.Printf("ZEFEER JOPA AFTER UPDATE %+v\n", peer)
 	if err != nil {
 		log.Printf("Update peer error: %s", err)
 	} else {
@@ -244,7 +234,6 @@ func (zefeer ZefeerClient) onZPINGResp(peer *Peer, envelope *Envelope) {
 		}
 	}
 
-	fmt.Printf("ZEFEER JOPA AFTER %+v\n", zefeer.Peers.peers)
 	for k, v := range zefeer.Peers.peers {
 		fmt.Printf("%s - %s\n", string(k), v)
 	}

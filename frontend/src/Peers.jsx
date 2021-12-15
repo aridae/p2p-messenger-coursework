@@ -15,15 +15,6 @@ export default class Peers extends Component {
                 name: key
             });
         }
-
-        // console.log(elem);
-        // console.log(elem.target);
-        // console.log(elem.parentNode);
-        // console.log(elem.target.getAttribute("data-id"));
-        // this.props.onSelectPeer({
-        //     id: elem.getAttribute("data-id"),
-        //     name: elem.getAttribute("data-name")
-        // });
     };
 
     render() {

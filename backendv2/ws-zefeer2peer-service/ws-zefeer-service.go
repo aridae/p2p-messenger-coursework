@@ -199,7 +199,6 @@ func (wszefeer *WSZefeerService) mapHTTPToZefeerTraffic(rw *bufio.ReadWriter, w 
 		// надо отправить его пиру
 		case string(MESSG):
 			{
-				fmt.Printf("JOPPA ENVELOPPA %+v\n", browserEnvelope)
 				hexPubKey := browserEnvelope.To
 				// if err != nil {
 				// 	log.Printf("decode error: %s", err)
@@ -207,7 +206,6 @@ func (wszefeer *WSZefeerService) mapHTTPToZefeerTraffic(rw *bufio.ReadWriter, w 
 				// }
 				peer, found := wszefeer.ZefeerClient.Peers.Get(zefeer2peer.HashKey(hexPubKey))
 				if found {
-					fmt.Printf("JOPA FOUND!")
 					wszefeer.ZefeerClient.SendMESSG(peer, browserEnvelope.Content)
 					//wszefeer.ZefeerClient.HandleIncomingTraffic(rw, peer)
 				}
@@ -229,7 +227,6 @@ func (wszefeer *WSZefeerService) mapHTTPToZefeerTraffic(rw *bufio.ReadWriter, w 
 				peers := wszefeer.ZefeerClient.Peers.ToList()
 				log.Printf("our PEERS: %+v", peers)
 				for _, p := range peers {
-					fmt.Println("JO Pa !", p.PubKey)
 				}
 
 				wsPeerList := &WSPeerList{

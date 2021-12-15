@@ -88,7 +88,6 @@ func (p *Peer) UpdatePeerOnZPING(envelope *Envelope) error {
 	}
 	p.Name = zping.Name
 	p.PubKey = rawPubKey
-	print("ATTENTIO JOPA!!!!!:: ", string(p.PubKey))
 	p.SharedKey.Update(rawExKey, nil)
 	return nil
 }

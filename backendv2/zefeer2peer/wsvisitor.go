@@ -32,14 +32,12 @@ func NewWSVisitor() *WSVisitor {
 }
 
 func (visitor *WSVisitor) UpdateOnConnect(newConn *websocket.Conn) {
-	log.Printf("OBNOVA VISITORA !")
 
 	visitor.conn = newConn
 }
 
 func (visitor *WSVisitor) VisitOnMESSG(env *Envelope) {
 	if visitor.conn != nil {
-		log.Printf("VISITORA JOPU VIDNO!!!!!!")
 
 		var peersMsg PeerMESSG
 		if err := json.Unmarshal(env.Body, &peersMsg); err != nil {
