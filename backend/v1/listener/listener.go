@@ -1,13 +1,8 @@
-/*
-Package listener
-Listen port and detect connection type
-*/
 package listener
 
 import (
 	"bufio"
 	"fmt"
-	"github.com/aridae/p2p-messenger-coursework/backend/proto"
 	"io"
 	"io/ioutil"
 	"log"
@@ -16,6 +11,8 @@ import (
 	"os"
 	"path"
 	"strings"
+
+	"github.com/aridae/p2p-messenger-coursework/backend/v1/proto"
 )
 
 var itHttp = map[string]bool{

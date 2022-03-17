@@ -9,7 +9,6 @@ import (
 
 //WSZefeerWriter - реализация интерфейса ResponseWriter
 type WSZefeerWriter struct {
-	// Conn is a generic stream-oriented network connection.
 	conn net.Conn
 }
 

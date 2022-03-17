@@ -10,15 +10,15 @@ import (
 	"log"
 	"time"
 
-	config "github.com/aridae/p2p-messenger-coursework/backendv2/config"
+	config "github.com/aridae/p2p-messenger-coursework/backend/v2/config"
 )
 
 type COMMAND string
 
 const (
-	ZPING COMMAND = "ZPING" // send name, accept name
-	PEERS COMMAND = "PEERS" // query peers of a particular peer
-	MESSG COMMAND = "MESSG" // send message
+	ZPING COMMAND = "ZPING"
+	PEERS COMMAND = "PEERS"
+	MESSG COMMAND = "MESSG"
 )
 
 type COMMAND_TYPE string

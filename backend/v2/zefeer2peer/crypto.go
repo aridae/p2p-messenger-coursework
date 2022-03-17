@@ -14,7 +14,6 @@ import (
 	"golang.org/x/crypto/curve25519"
 )
 
-//SaveKey create new *.seed file with random content
 func SaveKey(fileName string) *os.File {
 	file, e := os.Create(fileName)
 	if e != nil {

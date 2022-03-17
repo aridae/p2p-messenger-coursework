@@ -10,14 +10,12 @@ import (
 	"time"
 )
 
-//SharedKey ECDHE shared key
 type SharedKey struct {
 	RemoteKey []byte
 	LocalKey  []byte
 	Secret    []byte
 }
 
-//Update shared key info
 func (sk *SharedKey) Update(remoteKey []byte, localKey []byte) {
 	log.Println("print Update shared key info")
 

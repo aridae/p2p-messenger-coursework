@@ -12,7 +12,7 @@ services:
   zefeer_2:
     image: localhost/zefeer
     depends_on:
-      - zefeer_1
+      - zefeer_1 
     restart: unless-stopped
     ports:
       - "35035:35035"

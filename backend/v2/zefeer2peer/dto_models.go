@@ -2,7 +2,6 @@ package zefeer2peer
 
 import "encoding/json"
 
-//Serializable interface to detect that can to serialised to json
 type Serializable interface {
 	ToJson() []byte
 }
@@ -17,13 +16,11 @@ func toJson(v interface{}) []byte {
 	return json
 }
 
-//PeerName Peer name and public key
 type PeerName struct {
 	Name   string `json:"name"`
 	PubKey string `json:"id"`
 }
 
-//ToJson convert to JSON bytes
 func (v PeerName) ToJson() []byte {
 	return toJson(v)
 }

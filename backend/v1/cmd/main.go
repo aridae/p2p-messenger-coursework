@@ -22,9 +22,9 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/aridae/p2p-messenger-coursework/backend/discover"
-	"github.com/aridae/p2p-messenger-coursework/backend/listener"
-	"github.com/aridae/p2p-messenger-coursework/backend/proto"
+	"github.com/aridae/p2p-messenger-coursework/backend/v1/discover"
+	"github.com/aridae/p2p-messenger-coursework/backend/v1/listener"
+	"github.com/aridae/p2p-messenger-coursework/backend/v1/proto"
 	"github.com/webview/webview"
 )
 
@@ -98,7 +98,7 @@ func startWithWebView(p *proto.Proto) {
 	w := webview.New(debug)
 	defer w.Destroy()
 	w.SetTitle("Peer To Peer Messenger")
-	w.SetSize(800, 600, webview.HintNone)
+	// w.SetSize(800, 600, webview.HintNone)
 	w.Navigate(fmt.Sprintf("http://localhost:%v", initParams.Port))
 	w.Run()
 

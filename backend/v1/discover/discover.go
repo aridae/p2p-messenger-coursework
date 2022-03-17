@@ -11,7 +11,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/aridae/p2p-messenger-coursework/backend/proto"
+	"github.com/aridae/p2p-messenger-coursework/backend/v1/proto"
 )
 
 var peers = make(map[string]string)

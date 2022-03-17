@@ -3,11 +3,10 @@ package wszefeer2peer
 import (
 	"encoding/json"
 
-	"github.com/aridae/p2p-messenger-coursework/backendv2/zefeer2peer"
+	"github.com/aridae/p2p-messenger-coursework/backend/v2/zefeer2peer"
 )
 
 // тут модели, которые могут прийти от бразуера
-//Serializable interface to detect that can to serialised to json
 type Serializable interface {
 	ToJson() []byte
 }

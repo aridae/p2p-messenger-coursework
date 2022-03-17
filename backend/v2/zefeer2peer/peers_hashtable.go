@@ -3,15 +3,13 @@ package zefeer2peer
 import (
 	"strings"
 	"sync"
-	"log"
 )
 
 type HashKey string
 
 // хэш таблица для хранения пиров
 // наш клиент привязан к хранилищу пиров
-// потому что без него не сможет
-// обрабатывать запросы
+// потому что без него не сможет обрабатывать запросы
 type PeersHashTable struct {
 	rwmux *sync.RWMutex
 	peers map[HashKey]*Peer

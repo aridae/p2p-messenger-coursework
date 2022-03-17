@@ -15,9 +15,9 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/aridae/p2p-messenger-coursework/backend/proto"
-	config "github.com/aridae/p2p-messenger-coursework/backendv2/config"
-	"github.com/aridae/p2p-messenger-coursework/backendv2/zefeer2peer"
+	"github.com/aridae/p2p-messenger-coursework/backend/v1/proto"
+	config "github.com/aridae/p2p-messenger-coursework/backend/v2/config"
+	"github.com/aridae/p2p-messenger-coursework/backend/v2/zefeer2peer"
 	"github.com/gorilla/websocket"
 	netp2p "github.com/libp2p/go-reuseport"
 )
@@ -219,15 +219,9 @@ func (wszefeer *WSZefeerService) mapHTTPToZefeerTraffic(rw *bufio.ReadWriter, w 
 		case string(PEERS):
 			{
 				log.Println("GOT PEERS FROM BROWSER")
-				// TODO -
-				// Request peers from our peers
-				// Connect to these peers
-				// Send peers to browser
 
 				peers := wszefeer.ZefeerClient.Peers.ToList()
 				log.Printf("our PEERS: %+v", peers)
-				for _, p := range peers {
-				}
 
 				wsPeerList := &WSPeerList{
 					WSZefeerCmd: WSZefeerCmd{

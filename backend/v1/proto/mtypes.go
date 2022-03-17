@@ -2,7 +2,6 @@ package proto
 
 import "encoding/json"
 
-//Serializable interface to detect that can to serialised to json
 type Serializable interface {
 	ToJson() []byte
 }

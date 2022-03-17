@@ -26,7 +26,6 @@ export default class Main extends Component {
     }
 
     componentDidMount() {
-        // еб-сокет для общения с бэком 
         let socket = new WebSocket("ws://" + document.location.hostname + (document.location.port ? ':' + document.location.port : '') + "/ws");
         console.log(socket)
         this.setState({socket: socket}, () => {

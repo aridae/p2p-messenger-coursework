@@ -12,6 +12,7 @@ export default class Header extends Component {
         };
     }
 
+    
     toggleNavbar() {
         this.setState({
             collapsed: !this.state.collapsed

@@ -1,9 +1,3 @@
-/*
-  -name string
-    	you name (default "eku@eku-HP-ProBook-450-G3")
-  -port int
-    	port that have to listen (default 35035)
-*/
 package main
 
 import (
@@ -12,8 +6,8 @@ import (
 	"os"
 	"sync"
 
-	config "github.com/aridae/p2p-messenger-coursework/backendv2/config"
-	webserver "github.com/aridae/p2p-messenger-coursework/backendv2/ws-zefeer2peer-service"
+	config "github.com/aridae/p2p-messenger-coursework/backend/v2/config"
+	webserver "github.com/aridae/p2p-messenger-coursework/backend/v2/ws-zefeer2peer-service"
 )
 
 var (
@@ -28,7 +22,6 @@ func init() {
 	portInt = flag.Int("port", 35035, "port that have to listen")
 	flag.Parse()
 
-	// Настройки логирования
 	log.SetOutput(os.Stdout)
 	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
 }

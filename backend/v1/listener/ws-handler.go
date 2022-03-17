@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/aridae/p2p-messenger-coursework/backend/proto"
+	"github.com/aridae/p2p-messenger-coursework/backend/v1/proto"
 	"github.com/gorilla/websocket"
 )
 

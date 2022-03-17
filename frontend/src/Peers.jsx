@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import {Badge, ListGroup, ListGroupItem} from "reactstrap";
 import PropTypes from 'prop-types';
 
-
 export default class Peers extends Component {
     static defaultProps = {
         peers: []
